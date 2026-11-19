@@ -15,7 +15,7 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL:?set ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:?set ADMIN_PASSWORD}
       - ADMIN_NAME=${ADMIN_NAME:-Admin}
-      # Set to 1 when served over HTTPS (Coolify / https://bmkkomet.interna.tournament.com)
+      # Set to 1 when served over HTTPS (Coolify / https://internal.bmkkomet.se)
       - COOKIE_SECURE=${COOKIE_SECURE:-1}
       - TZ=${TZ:-Europe/Stockholm}
       - DATA_DIR=/app/data

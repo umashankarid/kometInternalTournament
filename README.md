@@ -16,7 +16,7 @@ Stack: Flask + SQLite (single container, no Node build), gunicorn. Same shape as
 
 1. Push this folder to a git repo and create a new Coolify resource from it.
    Build pack: **Dockerfile** (or **Docker Compose** using `docker-compose.yml`). Port: **5000**.
-2. Domain: set to `https://bmkkomet.interna.tournament.com` in the resource's *Domains* field, and create a DNS
+2. Domain: set to `https://internal.bmkkomet.se` in the resource's *Domains* field, and create a DNS
    record for that host pointing at the Coolify server (A/CNAME). Coolify's proxy issues the TLS certificate.
 3. Environment variables (see `.env.example`): `ADMIN_EMAIL`, `ADMIN_PASSWORD` (required), `ADMIN_NAME`,
    `SECRET_KEY` (optional), `COOKIE_SECURE=1`, `TZ`.
