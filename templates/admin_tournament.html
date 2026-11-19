@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}{{ t['name'] }} — admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin_home') }}">← All tournaments</a></p>
+<div class="card">
+  <div class="card-head">
+    <h1>{{ t['name'] }}</h1>
+    <div>
+      <a class="btn secondary" href="{{ url_for('admin_edit_tournament', tid=t['id']) }}">Edit</a>
+      <a class="btn" href="{{ url_for('admin_export_tournament', tid=t['id']) }}">⬇ Export (Excel)</a>
+      <form method="post" action="{{ url_for('admin_delete_tournament', tid=t['id']) }}" class="inline"
+            onsubmit="return confirm('Delete this tournament and ALL its registrations? This cannot be undone.');">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn danger" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+  <dl class="meta">
+    <dt>Dates</dt><dd>{{ t['start_date'] }}{% if t['end_date'] != t['start_date'] %} → {{ t['end_date'] }}{% endif %}</dd>
+    <dt>Register by</dt><dd>{{ t['registration_deadline'] }}</dd>
+    <dt>Cancel by</dt><dd>{{ t['cancellation_deadline'] }}</dd>
+    <dt>Total entries</dt><dd>{{ total }}</dd>
+  </dl>
+</div>
+
+<h2 class="section">Categories</h2>
+<div class="card">
+  <form method="post" action="{{ url_for('admin_add_category', tid=t['id']) }}" class="row">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input name="name" maxlength="80" required placeholder="Category name, e.g. Men's Singles">
+    <select name="type">
+      {% for ct in category_types %}<option value="{{ ct }}">{{ ct }}</option>{% endfor %}
+    </select>
+    <button class="btn" type="submit">Add</button>
+  </form>
+  <form method="post" action="{{ url_for('admin_add_category', tid=t['id']) }}" class="inline">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="defaults" value="1">
+    <button class="btn secondary small" type="submit">Add Singles / Doubles / Mixed Doubles</button>
+  </form>
+</div>
+
+{% for c in categories %}
+<div class="card">
+  <div class="card-head">
+    <h3>{{ c['name'] }} <span class="badge {{ c['type'] }}">{{ c['type'] }}</span>
+      <span class="muted">({{ by_cat[c['id']]|length }})</span></h3>
+    <form method="post" action="{{ url_for('admin_delete_category', cid=c['id']) }}" class="inline"
+          onsubmit="return confirm('Delete category {{ c['name']|e }} and its registrations?');">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn danger small" type="submit">Delete category</button>
+    </form>
+  </div>
+  {% if by_cat[c['id']] %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Player</th><th>Gender</th><th>DOB</th><th>Age</th><th>Email</th><th>Phone</th>
+      {% if c['type'] != 'singles' %}<th>Partner</th>{% endif %}<th>Registered</th><th></th></tr></thead>
+    <tbody>
+    {% for e in by_cat[c['id']] %}
+      <tr>
+        <td>{{ e.row['player'] }}</td>
+        <td>{{ e.row['gender'] }}</td>
+        <td>{{ e.row['dob'] }}</td>
+        <td>{{ e.age }}</td>
+        <td>{{ e.row['email'] }}</td>
+        <td>{{ e.row['phone'] }}</td>
+        {% if c['type'] != 'singles' %}<td>{{ e.partner }}</td>{% endif %}
+        <td>{{ e.row['registered_at'] }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin_delete_registration', rid=e.row['registration_id']) }}" class="inline"
+                onsubmit="return confirm('Remove this registration?');">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <button class="btn danger small" type="submit">Remove</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+    <p class="muted">No registrations yet.</p>
+  {% endif %}
+</div>
+{% else %}
+  <p class="muted">No categories yet — add some above so players can register.</p>
+{% endfor %}
+{% endblock %}

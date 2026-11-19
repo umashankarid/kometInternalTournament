@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: komet-internal-tournament
+    # Coolify's proxy (Traefik) routes the domain to this port; no host port
+    # mapping is needed there. Uncomment for local runs: http://localhost:5000
+    # ports:
+    #   - "5000:5000"
+    expose:
+      - "5000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:?set ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?set ADMIN_PASSWORD}
+      - ADMIN_NAME=${ADMIN_NAME:-Admin}
+      # Set to 1 when served over HTTPS (Coolify / https://bmkkomet.interna.tournament.com)
+      - COOKIE_SECURE=${COOKIE_SECURE:-1}
+      - TZ=${TZ:-Europe/Stockholm}
+      - DATA_DIR=/app/data
+    volumes:
+      - komet_tournament_data:/app/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5000/api/health', timeout=5).status == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  komet_tournament_data:

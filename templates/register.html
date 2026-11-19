@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Sign up{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h1>Create your account</h1>
+  <form method="post" autocomplete="on">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Full name
+      <input name="name" required maxlength="100" value="{{ form.get('name', '') }}" autocomplete="name">
+    </label>
+    <label>Email
+      <input type="email" name="email" required maxlength="150" value="{{ form.get('email', '') }}" autocomplete="email">
+    </label>
+    <label>Phone number
+      <input type="tel" name="phone" required maxlength="20" value="{{ form.get('phone', '') }}" autocomplete="tel">
+    </label>
+    <label>Gender
+      <select name="gender" required>
+        <option value="">Select…</option>
+        {% for g in genders %}<option value="{{ g }}" {{ 'selected' if form.get('gender') == g }}>{{ g }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Date of birth
+      <input type="date" name="dob" required max="{{ today }}" value="{{ form.get('dob', '') }}" autocomplete="bday">
+    </label>
+    <label>Password (min 8 characters)
+      <input type="password" name="password" required minlength="8" autocomplete="new-password">
+    </label>
+    <label>Repeat password
+      <input type="password" name="password2" required minlength="8" autocomplete="new-password">
+    </label>
+    <button class="btn" type="submit">Sign up</button>
+  </form>
+  <p class="muted">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+</div>
+{% endblock %}

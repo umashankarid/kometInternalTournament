@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="card-head">
+  <h1>Admin — tournaments</h1>
+  <div>
+    <a class="btn" href="{{ url_for('admin_new_tournament') }}">+ New tournament</a>
+    <a class="btn secondary" href="{{ url_for('admin_export_all') }}">⬇ Export all (Excel)</a>
+  </div>
+</div>
+<p class="muted">{{ user_count }} registered user{{ '' if user_count == 1 else 's' }}.</p>
+
+{% if tournaments %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Name</th><th>Dates</th><th>Register by</th><th>Cancel by</th><th>Categories</th><th>Entries</th><th></th></tr></thead>
+  <tbody>
+  {% for t in tournaments %}
+    <tr>
+      <td><a href="{{ url_for('admin_tournament', tid=t['id']) }}">{{ t['name'] }}</a></td>
+      <td>{{ t['start_date'] }}{% if t['end_date'] != t['start_date'] %} → {{ t['end_date'] }}{% endif %}</td>
+      <td>{{ t['registration_deadline'] }}</td>
+      <td>{{ t['cancellation_deadline'] }}</td>
+      <td>{{ t['category_count'] }}</td>
+      <td>{{ t['registration_count'] }}</td>
+      <td class="nowrap">
+        <a class="btn small" href="{{ url_for('admin_tournament', tid=t['id']) }}">Manage</a>
+        <a class="btn small secondary" href="{{ url_for('admin_export_tournament', tid=t['id']) }}">Excel</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+  <p class="muted">No tournaments yet. Create the first one.</p>
+{% endif %}
+{% endblock %}

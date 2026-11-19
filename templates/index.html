@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Tournaments</h1>
+
+{% macro card(t) %}
+<div class="card">
+  <div class="card-head">
+    <h2><a href="{{ url_for('tournament_detail', tid=t['id']) }}">{{ t['name'] }}</a></h2>
+    {% if t['finished'] %}<span class="badge grey">Finished</span>
+    {% elif t['registration_open'] %}<span class="badge green">Registration open</span>
+    {% else %}<span class="badge red">Registration closed</span>{% endif %}
+  </div>
+  <dl class="meta">
+    <dt>Dates</dt><dd>{{ t['start_date'] }}{% if t['end_date'] != t['start_date'] %} → {{ t['end_date'] }}{% endif %}</dd>
+    <dt>Register by</dt><dd>{{ t['registration_deadline'] }}</dd>
+    <dt>Cancel by</dt><dd>{{ t['cancellation_deadline'] }}</dd>
+  </dl>
+  <p>
+    {% for c in t['categories'] %}<span class="badge {{ c['type'] }}">{{ c['name'] }}</span> {% else %}<em>No categories yet</em>{% endfor %}
+  </p>
+  <a class="btn" href="{{ url_for('tournament_detail', tid=t['id']) }}">View &amp; register</a>
+</div>
+{% endmacro %}
+
+{% for t in upcoming %}{{ card(t) }}{% else %}
+  <p class="muted">No upcoming tournaments yet.</p>
+{% endfor %}
+
+{% if past %}
+  <h2 class="section">Past tournaments</h2>
+  {% for t in past %}{{ card(t) }}{% endfor %}
+{% endif %}
+{% endblock %}

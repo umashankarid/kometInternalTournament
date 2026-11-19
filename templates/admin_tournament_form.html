@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if editing else 'New' }} tournament{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h1>{{ 'Edit tournament' if editing else 'Create tournament' }}</h1>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Tournament name
+      <input name="name" required maxlength="120" value="{{ form.get('name', '') }}">
+    </label>
+    <div class="grid2">
+      <label>Start date
+        <input type="date" name="start_date" required value="{{ form.get('start_date', '') }}">
+      </label>
+      <label>End date
+        <input type="date" name="end_date" required value="{{ form.get('end_date', '') }}">
+      </label>
+      <label>Registration deadline
+        <input type="date" name="registration_deadline" required value="{{ form.get('registration_deadline', '') }}">
+      </label>
+      <label>Cancellation deadline
+        <input type="date" name="cancellation_deadline" required value="{{ form.get('cancellation_deadline', '') }}">
+      </label>
+    </div>
+
+    {% if not editing %}
+    <h3>Categories</h3>
+    <p class="muted">Singles has no partner; Doubles and Mixed let players enter an optional partner name.
+      You can also add categories later.</p>
+    <div id="cats">
+      {% set rows = posted_cats if posted_cats else defaults %}
+      {% for cname, ctype in rows %}
+        <div class="row cat-row">
+          <input name="cat_name" maxlength="80" value="{{ cname }}" placeholder="Category name">
+          <select name="cat_type">
+            {% for ct in category_types %}<option value="{{ ct }}" {{ 'selected' if ct == ctype }}>{{ ct }}</option>{% endfor %}
+          </select>
+          <button type="button" class="btn danger small" onclick="this.parentElement.remove()">✕</button>
+        </div>
+      {% endfor %}
+    </div>
+    <template id="cat-template">
+      <div class="row cat-row">
+        <input name="cat_name" maxlength="80" placeholder="Category name">
+        <select name="cat_type">
+          {% for ct in category_types %}<option value="{{ ct }}">{{ ct }}</option>{% endfor %}
+        </select>
+        <button type="button" class="btn danger small" onclick="this.parentElement.remove()">✕</button>
+      </div>
+    </template>
+    <button type="button" class="btn secondary small" id="add-cat">+ Add category</button>
+    <script>
+      document.getElementById('add-cat').addEventListener('click', function () {
+        var tpl = document.getElementById('cat-template');
+        document.getElementById('cats').appendChild(tpl.content.cloneNode(true));
+      });
+    </script>
+    {% endif %}
+
+    <div class="actions">
+      <button class="btn" type="submit">{{ 'Save changes' if editing else 'Create tournament' }}</button>
+      <a class="btn secondary" href="{{ url_for('admin_tournament', tid=t['id']) if editing else url_for('admin_home') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

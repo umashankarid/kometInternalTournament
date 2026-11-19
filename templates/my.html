@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}My registrations{% endblock %}
+{% block content %}
+<h1>My registrations</h1>
+{% if items %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Tournament</th><th>Dates</th><th>Category</th><th>Partner</th><th>Registered</th><th></th></tr></thead>
+  <tbody>
+  {% for i in items %}
+    <tr>
+      <td><a href="{{ url_for('tournament_detail', tid=i.t['id']) }}">{{ i.t['name'] }}</a></td>
+      <td>{{ i.t['start_date'] }}</td>
+      <td>{{ i.row['category'] }} <span class="badge {{ i.row['category_type'] }}">{{ i.row['category_type'] }}</span></td>
+      <td>{{ i.partner or '—' }}</td>
+      <td>{{ i.row['registered_at'] }}</td>
+      <td>
+        {% if i.t['cancellation_open'] %}
+        <form method="post" action="{{ url_for('cancel_registration', rid=i.row['registration_id']) }}" class="inline"
+              onsubmit="return confirm('Cancel this registration?');">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="btn danger small" type="submit">Cancel</button>
+        </form>
+        {% else %}<span class="muted">Locked</span>{% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+  <p class="muted">You have not registered for anything yet. <a href="{{ url_for('index') }}">Browse tournaments</a>.</p>
+{% endif %}
+{% endblock %}

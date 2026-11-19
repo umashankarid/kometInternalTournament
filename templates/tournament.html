@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}{{ t['name'] }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    <h1>{{ t['name'] }}</h1>
+    {% if t['finished'] %}<span class="badge grey">Finished</span>
+    {% elif t['registration_open'] %}<span class="badge green">Registration open</span>
+    {% else %}<span class="badge red">Registration closed</span>{% endif %}
+  </div>
+  <dl class="meta">
+    <dt>Dates</dt><dd>{{ t['start_date'] }}{% if t['end_date'] != t['start_date'] %} → {{ t['end_date'] }}{% endif %}</dd>
+    <dt>Register by</dt><dd>{{ t['registration_deadline'] }}</dd>
+    <dt>Cancel by</dt><dd>{{ t['cancellation_deadline'] }}</dd>
+  </dl>
+</div>
+
+<h2 class="section">Categories</h2>
+{% if not current_user and t['registration_open'] %}
+  <p class="flash info"><a href="{{ url_for('login') }}">Log in</a> or <a href="{{ url_for('register') }}">sign up</a> to register.</p>
+{% endif %}
+
+{% for c in categories %}
+  {% set reg = mine.get(c['id']) %}
+  <div class="card">
+    <div class="card-head">
+      <h3>{{ c['name'] }} <span class="badge {{ c['type'] }}">{{ c['type'] }}</span></h3>
+      <span class="muted">{{ c['entries'] }} registered</span>
+    </div>
+    {% if reg %}
+      <p>✅ You are registered{% if c['type'] != 'singles' %} —
+        partner: <strong>{{ reg['partner_name'] or 'open to any partner' }}</strong>{% endif %}</p>
+      {% if t['cancellation_open'] %}
+        <form method="post" action="{{ url_for('cancel_registration', rid=reg['id']) }}" class="inline"
+              onsubmit="return confirm('Cancel your registration for {{ c['name']|e }}?');">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="back" value="tournament">
+          <button class="btn danger" type="submit">Cancel registration</button>
+        </form>
+      {% else %}
+        <p class="muted">The cancellation deadline has passed.</p>
+      {% endif %}
+    {% elif current_user and t['registration_open'] %}
+      <form method="post" action="{{ url_for('register_category', tid=t['id']) }}" class="row">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="category_id" value="{{ c['id'] }}">
+        {% if c['type'] != 'singles' %}
+          <input name="partner_name" maxlength="100" placeholder="Partner name (optional — leave empty if open to any partner)">
+        {% endif %}
+        <button class="btn" type="submit">Register</button>
+      </form>
+    {% elif not t['registration_open'] %}
+      <p class="muted">Registration is closed.</p>
+    {% endif %}
+  </div>
+{% else %}
+  <p class="muted">The admin has not added categories yet.</p>
+{% endfor %}
+{% endblock %}
